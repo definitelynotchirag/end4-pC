@@ -27,6 +27,7 @@ import qs.modules.ii.wallpaperSelector
 import qs.modules.ii.desktopMenu
 import qs.modules.ii.dropover
 import qs.modules.ii.frame
+import qs.modules.ii.voxtype
 
 Scope {
     PanelLoader { extraCondition: !Config.options.bar.vertical; component: Bar {} }
@@ -54,4 +55,5 @@ Scope {
     PanelLoader { extraCondition: GlobalStates.dropShelfOpen; component: DropShelfPanel {} }
     PanelLoader { component: NiriBackdrop {} }
     PanelLoader { component: ScreenFrame {} }
+    PanelLoader { component: VoxtypeOverlay {} }
 }
