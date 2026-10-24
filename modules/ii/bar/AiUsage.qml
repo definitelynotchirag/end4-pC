@@ -14,11 +14,12 @@ MouseArea {
     implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : content.implicitWidth + 12
     implicitHeight: vertical ? content.implicitHeight + 10 : Appearance.sizes.barHeight
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
+    onClicked: ClaudeUsage.refresh()
 
     GridLayout {
         id: content
         anchors.centerIn: parent
-        columns: root.vertical ? 1 : 2
+        columns: root.vertical ? 1 : 3
         columnSpacing: 5
         rowSpacing: 2
 
@@ -36,6 +37,14 @@ MouseArea {
             text: `${Math.round(ClaudeUsage.percentage * 100)}%`
             font.pixelSize: root.vertical ? Appearance.font.pixelSize.smaller : Appearance.font.pixelSize.small
             color: root.active ? root.contentColor : (root.contentColorOverridden ? Qt.alpha(root.contentColor, 0.6) : Appearance.colors.colSubtext)
+        }
+
+        StyledText {
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            visible: ClaudeUsage.live
+            text: `${Math.round(ClaudeUsage.weekPercentage * 100)}%w`
+            font.pixelSize: Appearance.font.pixelSize.smaller
+            color: root.contentColorOverridden ? Qt.alpha(root.contentColor, 0.6) : Appearance.colors.colSubtext
         }
     }
 
