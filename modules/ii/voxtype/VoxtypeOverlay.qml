@@ -20,6 +20,10 @@ Scope {
     property string keyState: ""          // altgr-dictation.state first word
     readonly property bool active: voxState === "recording" || voxState === "transcribing"
     readonly property bool recording: voxState === "recording"
+    // Mapped from the moment dictation starts until the hide animation ends.
+    // (Binding visibility to `active || hideAnim.running` unmapped and remapped
+    // the window in the gap before the animation started.)
+    property bool mapped: false
     readonly property bool toggleMode: keyState === "toggled"
     property var focusedScreen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)
 
@@ -33,28 +37,28 @@ Scope {
         return a;
     }
 
-    FileView {
-        id: stateFile
-        path: root.runtimeDir + "/voxtype/state"
-        onLoaded: root.voxState = text().trim() || "idle"
-        onLoadFailed: root.voxState = "idle"
-    }
-    FileView {
-        id: keyFile
-        path: root.runtimeDir + "/altgr-dictation.state"
-        onLoaded: root.keyState = (text().trim().split(" ")[0]) || ""
-        onLoadFailed: root.keyState = ""
-    }
-    // Voxtype rewrites its state file by rename, which an inotify watch on the
-    // old inode misses; polling two tiny files is cheaper than being wrong.
-    Timer {
-        interval: 120
+    // Read both state files from one tiny shell loop. Quickshell's FileView
+    // missed Voxtype's rapid state rewrites (the pill sometimes never showed,
+    // or showed seconds late); a 100 ms cat is cheap and never misses.
+    Process {
+        id: stateWatch
         running: true
-        repeat: true
-        onTriggered: {
-            stateFile.reload();
-            keyFile.reload();
+        command: ["sh", "-c", "d=\"${XDG_RUNTIME_DIR:-/tmp}\"; while :; do v=$(cat \"$d/voxtype/state\" 2>/dev/null); k=$(cut -d' ' -f1 \"$d/altgr-dictation.state\" 2>/dev/null); echo \"${v:-idle} ${k:--}\"; sleep 0.1; done"]
+        stdout: SplitParser {
+            splitMarker: "\n"
+            onRead: line => {
+                const [vox, key] = line.trim().split(" ");
+                if (vox && vox !== root.voxState) root.voxState = vox;
+                const k = key === "-" ? "" : (key ?? "");
+                if (k !== root.keyState) root.keyState = k;
+            }
         }
+        onExited: restartWatch.restart()
+    }
+    Timer {
+        id: restartWatch
+        interval: 1000
+        onTriggered: stateWatch.running = true
     }
 
     // Mic spectrum: cava on the default input while recording.
@@ -88,8 +92,10 @@ Scope {
 
     PanelWindow {
         id: win
-        screen: root.focusedScreen
-        visible: root.active || hideAnim.running
+        // Hyprland's focused monitor isn't known yet when the shell starts;
+        // fall back to the first screen so the window always has one.
+        screen: root.focusedScreen ?? Quickshell.screens[0]
+        visible: root.mapped
         color: "transparent"
 
         WlrLayershell.namespace: "quickshell:voxtype"
@@ -201,6 +207,8 @@ Scope {
 
                     // Transcribing: a soft sweep across the resting bars.
                     Rectangle {
+                        id: sweep
+                        readonly property real travel: Math.max(0, sweep.parent.width - sweep.width)
                         visible: root.voxState === "transcribing"
                         anchors.verticalCenter: parent.verticalCenter
                         width: 40
@@ -210,8 +218,8 @@ Scope {
                         SequentialAnimation on x {
                             running: root.voxState === "transcribing"
                             loops: Animation.Infinite
-                            NumberAnimation { from: 0; to: Math.max(0, parent.width - 40); duration: 650; easing.type: Easing.InOutSine }
-                            NumberAnimation { from: Math.max(0, parent.width - 40); to: 0; duration: 650; easing.type: Easing.InOutSine }
+                            NumberAnimation { from: 0; to: sweep.travel; duration: 650; easing.type: Easing.InOutSine }
+                            NumberAnimation { from: sweep.travel; to: 0; duration: 650; easing.type: Easing.InOutSine }
                         }
                     }
                 }
@@ -239,6 +247,7 @@ Scope {
     onActiveChanged: {
         if (active) {
             hideAnim.stop();
+            mapped = true;
             showAnim.restart();
         } else {
             showAnim.stop();
@@ -285,6 +294,7 @@ Scope {
 
     ParallelAnimation {
         id: hideAnim
+        onFinished: if (!root.active) root.mapped = false
         NumberAnimation {
             target: cardScale; property: "yScale"; to: 0.3
             duration: 220
