@@ -24,7 +24,7 @@ Scope {
         id: cornerPanelWindow
         property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
         property bool fullscreen
-        readonly property bool showFakeRounding: Config.options.bar.cornerStyle !== 5
+        readonly property bool showFakeRounding: ReadingMode.barCornerStyle !== 5
             && (Config.options.appearance.fakeScreenRounding === 1 || (Config.options.appearance.fakeScreenRounding === 2 && !fullscreen))
         visible: showFakeRounding || Config.options.sidebar.cornerOpen.enable
         property var corner

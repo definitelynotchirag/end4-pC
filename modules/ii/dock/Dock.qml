@@ -15,6 +15,8 @@ import Quickshell.Wayland
 Scope {
     id: root
     property bool pinned: Config.options?.dock.pinnedOnStartup ?? false
+    // Reading mode hides the dock until hovered; the pin itself is kept.
+    readonly property bool effectivePinned: pinned && !GlobalStates.readingMode
     property bool barState: false
     property bool ready: false
 
@@ -78,14 +80,14 @@ Scope {
                     return true
                 if (fullscreenOnThisMonitor)
                     return Config.options?.dock.hoverToReveal && dockMouseArea.containsMouse
-                return root.pinned
+                return root.effectivePinned
                     || (Config.options?.dock.hoverToReveal && (dockMouseArea.containsMouse || GlobalStates.isFrameHovered(dockRoot.screen?.name, dockRoot.position)))
                     || activeApps.requestDockShow
                     || dragSlots.requestDockShow
                     || (!ToplevelManager.activeToplevel?.activated)
             }
 
-            exclusiveZone: (root.pinned && !fullscreenOnThisMonitor)
+            exclusiveZone: (root.effectivePinned && !fullscreenOnThisMonitor)
                 ? DockStyle.zone
                 : 0
 

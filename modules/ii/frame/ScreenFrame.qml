@@ -12,7 +12,7 @@ Scope {
     property real frameThickness: Config.options.bar.frameThickness
     property color frameColor: Appearance.getColorFromName(Config.options.bar.frameColor)
     readonly property bool centerOnly: Config.options.bar.layouts.leftLayout.length === 0 && Config.options.bar.layouts.rightLayout.length === 0
-    readonly property bool hideBarSideFrame: Config.options.bar.cornerStyle === 0
+    readonly property bool hideBarSideFrame: ReadingMode.barCornerStyle === 0
     readonly property string barPosition: {
         if (Config.options.bar.vertical)
             return Config.options.bar.bottom ? "right" : "left"
@@ -21,7 +21,7 @@ Scope {
 
     function frameVisibleFor(side) {
         if (!Config.options.bar.showFrame) return false
-        if (Config.options.bar.cornerStyle === 0 && side === root.barPosition) {
+        if (ReadingMode.barCornerStyle === 0 && side === root.barPosition) {
             return root.centerOnly || !Config.options.bar.showBackground
         }
         return true
@@ -30,7 +30,7 @@ Scope {
     function edgeNeedsInput(side) {
         if (!frameVisibleFor(side)) return false
         const dockWants = Config.options.dock.enable && Config.options.dock.hoverToReveal && Config.options.dock.position === side
-        const barWants = Config.options.bar.autoHide.enable && root.barPosition === side
+        const barWants = GlobalStates.barAutoHide && root.barPosition === side
         return dockWants || barWants
     }
 

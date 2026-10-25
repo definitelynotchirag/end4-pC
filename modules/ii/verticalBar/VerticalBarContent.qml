@@ -17,9 +17,9 @@ Item {
     height: parent.height
 
     readonly property real barPadding: 0
-    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
-    readonly property bool isMaterialHug: Config.options.bar.cornerStyle === 4
-    readonly property bool isSplitHug: Config.options.bar.cornerStyle === 6
+    readonly property bool isMaterial: ReadingMode.barCornerStyle === 3 || ReadingMode.barCornerStyle === 4
+    readonly property bool isMaterialHug: ReadingMode.barCornerStyle === 4
+    readonly property bool isSplitHug: ReadingMode.barCornerStyle === 6
     readonly property bool hasTabs: root.isMaterialHug || root.isSplitHug
     readonly property bool useTabWrapper: root.isMaterial || root.isSplitHug
     readonly property real splitGroupSpacing: Config.options.bar.borderless === "transparent" ? -4 : Config.options.bar.borderless === "segmented" ? -2 : 2
@@ -27,7 +27,7 @@ Item {
         ? Appearance.getColorFromName(Config.options.bar.frameColor)
         : Appearance.colors.colUiBackground
     readonly property bool trayHasItems: SystemTray.items.values.length > 0
-    readonly property bool isPanel: Config.options.bar.cornerStyle === 5
+    readonly property bool isPanel: ReadingMode.barCornerStyle === 5
 
     function filterLayout(layout) {
         if (trayHasItems) return layout
@@ -91,16 +91,16 @@ Item {
         }
         anchors {
             fill: parent
-            margins: Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut : 0
+            margins: ReadingMode.barCornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut : 0
         }
-        property color fill: (!centerOnly && Config.options.bar.showBackground && Config.options.bar.cornerStyle !== 2 && !root.useTabWrapper)
+        property color fill: (!centerOnly && Config.options.bar.showBackground && ReadingMode.barCornerStyle !== 2 && !root.useTabWrapper)
             ? (Config.options.bar.followFrameColor
                 ? Appearance.getColorFromName(Config.options.bar.frameColor)
                 : Appearance.colors.colUiBackground)
             : "transparent"
         color: Config.options.background.widgets.glass.enable && fill.a > 0 ? "transparent" : fill
-        radius: Config.options.bar.cornerStyle === 1 ? Appearance.rounding.windowRounding + 6 : 0
-        border.width: (!root.centerOnly && Config.options.bar.cornerStyle === 1) ? 1 : 0
+        radius: ReadingMode.barCornerStyle === 1 ? Appearance.rounding.windowRounding + 6 : 0
+        border.width: (!root.centerOnly && ReadingMode.barCornerStyle === 1) ? 1 : 0
         border.color: Config.options.bar.showBackground ? Appearance.colors.colLayer0Border : "transparent"
     }
 
@@ -117,23 +117,23 @@ Item {
             bottomRightRadius: parent && parent.bottomRightRadius >= 0 ? parent.bottomRightRadius : cardRadius
             tint: parent?.fill ?? 'transparent'
         }
-        visible: root.centerOnly && Config.options.bar.showBackground && Config.options.bar.cornerStyle !== 2
+        visible: root.centerOnly && Config.options.bar.showBackground && ReadingMode.barCornerStyle !== 2
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
         height: middleCol.implicitHeight + 7
-        width: parent.width - (Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut * 2 : 0)
+        width: parent.width - (ReadingMode.barCornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut * 2 : 0)
         property color fill: Config.options.bar.followFrameColor
             ? Appearance.getColorFromName(Config.options.bar.frameColor)
             : Appearance.colors.colUiBackground
         color: Config.options.background.widgets.glass.enable && fill.a > 0 ? "transparent" : fill
-        radius: Config.options.bar.cornerStyle === 1 ? Appearance.rounding.windowRounding : 0
-        border.width: Config.options.bar.cornerStyle === 1 ? 1 : 0
+        radius: ReadingMode.barCornerStyle === 1 ? Appearance.rounding.windowRounding : 0
+        border.width: ReadingMode.barCornerStyle === 1 ? 1 : 0
         border.color: Appearance.colors.colLayer0Border
 
-        bottomRightRadius: Config.options.bar.cornerStyle === 0 && !Config.options.bar.bottom ? Appearance.rounding.screenRounding : radius
-        topRightRadius:    Config.options.bar.cornerStyle === 0 && !Config.options.bar.bottom ? Appearance.rounding.screenRounding : radius
-        bottomLeftRadius:  Config.options.bar.cornerStyle === 0 && Config.options.bar.bottom  ? Appearance.rounding.screenRounding : radius
-        topLeftRadius:     Config.options.bar.cornerStyle === 0 && Config.options.bar.bottom  ? Appearance.rounding.screenRounding : radius
+        bottomRightRadius: ReadingMode.barCornerStyle === 0 && !Config.options.bar.bottom ? Appearance.rounding.screenRounding : radius
+        topRightRadius:    ReadingMode.barCornerStyle === 0 && !Config.options.bar.bottom ? Appearance.rounding.screenRounding : radius
+        bottomLeftRadius:  ReadingMode.barCornerStyle === 0 && Config.options.bar.bottom  ? Appearance.rounding.screenRounding : radius
+        topLeftRadius:     ReadingMode.barCornerStyle === 0 && Config.options.bar.bottom  ? Appearance.rounding.screenRounding : radius
     }
 
     Item {
@@ -145,7 +145,7 @@ Item {
         Item {
             id: topItem
             anchors.top: parent.top
-            anchors.topMargin: root.hasTabs ? 0 : (root.useTabWrapper ? (Appearance.sizes.hyprlandGapsOut || 5) : (Config.options.bar.cornerStyle === 1 ? 4 : Config.options.bar.cornerStyle === 5 ? 4 : 10))
+            anchors.topMargin: root.hasTabs ? 0 : (root.useTabWrapper ? (Appearance.sizes.hyprlandGapsOut || 5) : (ReadingMode.barCornerStyle === 1 ? 4 : ReadingMode.barCornerStyle === 5 ? 4 : 10))
             anchors.left: parent.left
             anchors.right: parent.right
             height: root.useTabWrapper
@@ -397,7 +397,7 @@ Item {
         Item {
             id: bottomItem
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: root.hasTabs ? 0 : (root.useTabWrapper ? (Appearance.sizes.hyprlandGapsOut || 5) : (Config.options.bar.cornerStyle === 1 ? 4 : Config.options.bar.cornerStyle === 5 ? 4 : 10))
+            anchors.bottomMargin: root.hasTabs ? 0 : (root.useTabWrapper ? (Appearance.sizes.hyprlandGapsOut || 5) : (ReadingMode.barCornerStyle === 1 ? 4 : ReadingMode.barCornerStyle === 5 ? 4 : 10))
             anchors.left: parent.left
             anchors.right: parent.right
             height: root.useTabWrapper

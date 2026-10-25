@@ -130,22 +130,6 @@ Item {
             z: 0
         }
 
-        // Blur art 
-        Image {
-            id: blurredArt
-            anchors.fill: parent
-            source: root.displayedArtFilePath
-            fillMode: Image.PreserveAspectCrop
-            cache: false
-            antialiasing: true
-            asynchronous: true
-            z: 1
-            layer.enabled: true
-            layer.effect: StyledBlurEffect {
-                source: blurredArt
-            }
-        }
-
         // Overlay
         Rectangle {
             anchors.fill: parent

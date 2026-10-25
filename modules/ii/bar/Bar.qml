@@ -51,7 +51,12 @@ Scope {
                     }
                 }
 
-                property bool showCorners: !Config.options.bar.autoHide.enable || mustShow
+                property bool showCorners: !GlobalStates.barAutoHide || mustShow
+                // Floating style (cornerStyle 3) sits 5px below the edge. With a top
+                // auto-hide bar that gap moves inside the window, so the window
+                // touches the screen edge and a cursor pushed to y=0 still reveals it.
+                property int floatGap: ReadingMode.barCornerStyle === 3 ? 5 : 0
+                property bool gapInside: GlobalStates.barAutoHide && !Config.options.bar.bottom
 
                 Timer {
                     id: cornerRevealTimer
@@ -60,7 +65,7 @@ Scope {
                 }
 
                 onMustShowChanged: {
-                    if (!Config.options.bar.autoHide.enable) return;
+                    if (!GlobalStates.barAutoHide) return;
                     if (mustShow) {
                         cornerRevealTimer.restart()
                     } else {
@@ -70,20 +75,20 @@ Scope {
                 }
                 property bool superShow: false
                 property bool mustShow: hoverRegion.containsMouse || superShow
-                    || (Config.options.bar.autoHide.enable && GlobalStates.isFrameHovered(barRoot.screen?.name, Config.options.bar.bottom ? "bottom" : "top"))
+                    || (GlobalStates.barAutoHide && GlobalStates.isFrameHovered(barRoot.screen?.name, Config.options.bar.bottom ? "bottom" : "top"))
                 property var thisMonitorData: HyprlandData.monitors.find(m => m.name === barRoot.screen?.name)
                 property bool monitorHasFullscreen: HyprlandData.workspaceById[thisMonitorData?.activeWorkspace?.id]?.hasfullscreen ?? false
                 property bool monitorHasSpecialOpen: (thisMonitorData?.specialWorkspace?.name ?? "") !== ""
                 exclusionMode: ExclusionMode.Ignore
-                property int normalExclusiveZone: (Config?.options.bar.autoHide.enable && (!mustShow || !Config?.options.bar.autoHide.pushWindows))
+                property int normalExclusiveZone: (GlobalStates.barAutoHide && (!mustShow || !Config?.options.bar.autoHide.pushWindows))
                     ? 0
                     : Appearance.sizes.baseBarHeight
-                        + (Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut : 0)
-                        + (Config.options.bar.cornerStyle === 2 ? -6 : 0)
+                        + (ReadingMode.barCornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut : 0)
+                        + (ReadingMode.barCornerStyle === 2 ? -6 : 0)
 
                 exclusiveZone: (barContent.centerOnly && Config.options.bar.centerOnlyReserveFrame)
                     ? Config.options.bar.frameThickness
-                    : (Config.options.bar.cornerStyle === 4 || Config.options.bar.cornerStyle === 5 || Config.options.bar.cornerStyle === 6) ? normalExclusiveZone + 4 : normalExclusiveZone
+                    : (ReadingMode.barCornerStyle === 4 || ReadingMode.barCornerStyle === 5 || ReadingMode.barCornerStyle === 6) && normalExclusiveZone > 0 ? normalExclusiveZone + 4 : normalExclusiveZone
                 WlrLayershell.namespace: "quickshell:bar"
                 // Overlay layer only while special workspace sits on top of a fullscreen window on this monitor,
                 // else Top layer so fullscreen apps cover the bar as normal (Hyprland buries Top layer under fullscreen+special).
@@ -124,9 +129,9 @@ Scope {
                 }
 
                 margins {
-                    top: Config.options.bar.cornerStyle === 3 ? 5 : 0
+                    top: barRoot.gapInside ? 0 : barRoot.floatGap
                     right: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.right) * -1
-                    bottom: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.bottom) * -1 || Config.options.bar.cornerStyle === 3 ? 5 : 0
+                    bottom: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.bottom) * -1 || ReadingMode.barCornerStyle === 3 ? 5 : 0
                 }
 
                 // Include in focus grab
@@ -163,7 +168,7 @@ Scope {
                         id: hoverMaskRegion
                         anchors {
                             fill: barContent
-                            topMargin: -Config.options.bar.autoHide.hoverRegionWidth
+                            topMargin: -Config.options.bar.autoHide.hoverRegionWidth - (barRoot.gapInside ? barRoot.floatGap : 0)
                             bottomMargin: -Config.options.bar.autoHide.hoverRegionWidth
                         }
                     }
@@ -177,7 +182,7 @@ Scope {
                             left: parent.left
                             top: parent.top
                             bottom: undefined
-                            topMargin: (Config?.options.bar.autoHide.enable && !mustShow) ? -Appearance.sizes.barHeight : 0
+                            topMargin: (GlobalStates.barAutoHide && !mustShow) ? -Appearance.sizes.barHeight : (barRoot.gapInside ? barRoot.floatGap : 0)
                             bottomMargin: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.bottom) * -1
                             rightMargin: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.right) * -1
                         }
@@ -203,7 +208,7 @@ Scope {
                             PropertyChanges {
                                 target: barContent
                                 anchors.topMargin: 0
-                                anchors.bottomMargin: (Config?.options.bar.autoHide.enable && !mustShow) ? -Appearance.sizes.barHeight : 0
+                                anchors.bottomMargin: (GlobalStates.barAutoHide && !mustShow) ? -Appearance.sizes.barHeight : 0
                             }
                         }
                     }
@@ -218,8 +223,8 @@ Scope {
                             bottom: undefined
                         }
                         height: Appearance.rounding.screenRounding
-                        active: (showBarBackground && Config.options.bar.cornerStyle === 0 && !barContent.centerOnly)
-                             || (Config.options.bar.cornerStyle === 4 || Config.options.bar.cornerStyle === 6)
+                        active: (showBarBackground && ReadingMode.barCornerStyle === 0 && !barContent.centerOnly)
+                             || (ReadingMode.barCornerStyle === 4 || ReadingMode.barCornerStyle === 6)
 
                         states: State {
                             name: "bottom"
@@ -238,7 +243,7 @@ Scope {
                         sourceComponent: Item {
                             implicitHeight: Appearance.rounding.screenRounding
 
-                            readonly property color decoratorColor: (Config.options.bar.cornerStyle === 4 || Config.options.bar.cornerStyle === 6 || showBarBackground)
+                            readonly property color decoratorColor: (ReadingMode.barCornerStyle === 4 || ReadingMode.barCornerStyle === 6 || showBarBackground)
                                 ? (Config.options.bar.followFrameColor && Config.options.bar.frameColor
                                     ? Appearance.getColorFromName(Config.options.bar.frameColor)
                                     : Appearance.colors.colUiBackground)
@@ -247,7 +252,7 @@ Scope {
                             RoundCorner {
                                 id: leftCorner
                                 glass: true
-                                visible: Config.options.bar.cornerStyle === 0 || barContent.effectiveLeftLayout.length > 0
+                                visible: ReadingMode.barCornerStyle === 0 || barContent.effectiveLeftLayout.length > 0
                                 anchors {
                                     top: parent.top
                                     bottom: parent.bottom
@@ -269,7 +274,7 @@ Scope {
                             RoundCorner {
                                 id: rightCorner
                                 glass: true
-                                visible: Config.options.bar.cornerStyle === 0 || barContent.effectiveRightLayout.length > 0
+                                visible: ReadingMode.barCornerStyle === 0 || barContent.effectiveRightLayout.length > 0
                                 anchors {
                                     right: parent.right
                                     top: !Config.options.bar.bottom ? parent.top : undefined

@@ -52,8 +52,8 @@ Scope {
         if (!barVertical) return Config.options.bar.bottom ? "bottom" : "top"
         return Config.options.bar.bottom ? "right" : "left"
     }
-    readonly property real gap: Config.options.bar.cornerStyle === 3 ? Appearance.sizes.hyprlandGapsOut : 0
-    readonly property bool cornerStyleReducesGap: Config.options.bar.cornerStyle === 1 || Config.options.bar.cornerStyle === 2
+    readonly property real gap: ReadingMode.barCornerStyle === 3 ? Appearance.sizes.hyprlandGapsOut : 0
+    readonly property bool cornerStyleReducesGap: ReadingMode.barCornerStyle === 1 || ReadingMode.barCornerStyle === 2
     readonly property real barThickness: barVertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight
 
     // Now-playing art, purely decorative here (same download-cache approach
@@ -124,7 +124,7 @@ Scope {
         id: coverArtDownloader
         property string targetFile: root.artUrl
         property string targetPath: root.artFilePath
-        command: ["bash", "-c", `[ -f ${targetPath} ] || curl -4 -sSL '${targetFile}' -o '${targetPath}'`]
+        command: ["bash", "-c", `[ -f ${targetPath} ] || curl -4 -sSL --create-dirs '${targetFile}' -o '${targetPath}'`]
         // Keep the visible art on the live MPRIS URL for the current frame -
         // do not replace it on download completion, since that can make the
         // background briefly wait on a local-file reload and can race when

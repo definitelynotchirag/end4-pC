@@ -26,7 +26,7 @@ Scope {
         readonly property bool barOverlapActive: panelWindow.barCenterOnly
             && Config.options.bar.centerOnlyReserveFrame
             && !Config.options.bar.bottom
-            && !Config.options.bar.autoHide.enable
+            && !GlobalStates.barAutoHide
         property bool monitorIsFocused: (Hyprland.focusedMonitor?.id == monitor?.id)
         visible: GlobalStates.overviewOpen
 

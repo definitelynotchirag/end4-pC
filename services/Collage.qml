@@ -93,7 +93,7 @@ Singleton {
         const frame = bar.showFrame ? bar.frameThickness : 0
         const insets = { left: frame, right: frame, top: frame, bottom: frame }
         const onScreen = bar.screenList.length === 0 || bar.screenList.includes(screenName)
-        if (GlobalStates.barOpen && !GlobalStates.screenLocked && onScreen && !bar.autoHide.enable) {
+        if (GlobalStates.barOpen && !GlobalStates.screenLocked && onScreen && !GlobalStates.barAutoHide) {
             const thickness = bar.vertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight
             const edge = bar.vertical ? (bar.bottom ? "right" : "left") : (bar.bottom ? "bottom" : "top")
             insets[edge] = Math.max(insets[edge], thickness)

@@ -36,6 +36,10 @@ Singleton {
     property bool workspaceShowNumbers: false
     property var settingsTarget: null
 
+    // Reading mode overrides; see modules/common/ReadingMode.qml.
+    readonly property bool readingMode: ReadingMode.active
+    readonly property bool barAutoHide: ReadingMode.barAutoHide
+
     function openSettingsAt(pageId, label, section, subsection) {
         root.settingsOpen = true;
         Qt.callLater(() => {

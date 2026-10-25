@@ -8,7 +8,7 @@ Item {
     property bool vertical: false
     property int currentIndex: 0
     property int totalCount: 0
-    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    property bool isMaterial: ReadingMode.barCornerStyle === 3 || ReadingMode.barCornerStyle === 4
     property bool paintMaterialPill: false
     property bool paintBackground: true
     property color bgColor: Appearance.colors.colPrimaryContainer
@@ -115,7 +115,7 @@ Item {
     property real padding: root.style?.padding ?? ((root.isMaterial && !root.paintMaterialPill) ? 0 : 5)
 
     readonly property bool isSegmented: Config.options?.bar.borderless === "segmented"
-    readonly property bool isPanel: Config.options.bar.cornerStyle === 5
+    readonly property bool isPanel: ReadingMode.barCornerStyle === 5
     readonly property real panelRadius: Appearance.rounding.unsharpenmore + 4
 
     readonly property real fullRadius: root.isPanel ? root.panelRadius : height / 2
@@ -123,7 +123,7 @@ Item {
         ? root.panelRadius
         : root.isSegmented
             ? 0
-            : (Config.options.bar.cornerStyle === 2 ? Appearance.rounding.unsharpenmore + 2 : Appearance.rounding.unsharpenmore)
+            : (ReadingMode.barCornerStyle === 2 ? Appearance.rounding.unsharpenmore + 2 : Appearance.rounding.unsharpenmore)
 
     property real startRadius: {
         if (totalCount <= 1) return fullRadius;
@@ -172,7 +172,7 @@ Item {
                     ? root.bgColor
                     : (Config.options?.bar.borderless === "transparent"
                         ? "transparent"
-                        : Config.options.bar.cornerStyle === 2 || (Config.options?.bar.borderless === "segmented" && !Config.options.bar.showBackground)
+                        : ReadingMode.barCornerStyle === 2 || (Config.options?.bar.borderless === "segmented" && !Config.options.bar.showBackground)
                             ? Appearance.colors.colUiBackground
                             : root.resolvedGroupColor)
 

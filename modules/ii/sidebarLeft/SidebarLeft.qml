@@ -186,9 +186,9 @@ Scope { // Scope
             margins {
                 top: {
                     if (Config.options.bar.bottom) return 0;
-                    if (Config?.options.bar.autoHide.enable) return 0;
+                    if (GlobalStates.barAutoHide) return 0;
                     if (!centerOnly) return 0;
-                    switch (Config.options.bar.cornerStyle) {
+                    switch (ReadingMode.barCornerStyle) {
                     case 0:
                     case 4:
                     case 6: return -root.barCenterOnlyOffset;
@@ -200,9 +200,9 @@ Scope { // Scope
                 }
                 bottom: {
                     if (!Config.options.bar.bottom) return 0;
-                    if (Config?.options.bar.autoHide.enable) return 0;
+                    if (GlobalStates.barAutoHide) return 0;
                     if (!centerOnly) return 0;
-                    switch (Config.options.bar.cornerStyle) {
+                    switch (ReadingMode.barCornerStyle) {
                     case 0:
                     case 4:
                     case 6: return -root.barCenterOnlyOffset;

@@ -13,7 +13,7 @@ MaterialSymbol {
 
     text: Notifications.silent ? "notifications_paused" : "notifications"
     iconSize: Appearance.font.pixelSize.larger
-    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    readonly property bool isMaterial: ReadingMode.barCornerStyle === 3 || ReadingMode.barCornerStyle === 4
     readonly property bool glassy: Config.options.background.widgets.glass.enable
     color: root.contentColorOverridden ? root.contentColor : (root.isDi ? Appearance.colors.colOnLayer1 : (root.isMaterial ? (root.glassy ? Appearance.colors.colOnLayer0 : Appearance.colors.colOnPrimary) : Appearance.colors.colOnLayer1))
 

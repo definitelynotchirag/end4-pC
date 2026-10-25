@@ -120,7 +120,7 @@ Item {
         id: coverArtDownloader
         property string targetFile: root.artUrl
         property string artFilePath: root.artFilePath
-        command: ["bash", "-c", `[ -f ${artFilePath} ] || curl -4 -sSL '${targetFile}' -o '${artFilePath}'`]
+        command: ["bash", "-c", `[ -f ${artFilePath} ] || curl -4 -sSL --create-dirs '${targetFile}' -o '${artFilePath}'`]
         onExited: (exitCode, exitStatus) => {
             root.downloaded = true
         }
